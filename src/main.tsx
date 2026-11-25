@@ -71,7 +71,7 @@ function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcs
   const world = useRef<HTMLDivElement>(null);
   const player = useRef<HTMLDivElement>(null);
   const direction = useRef(0);
-  const position = useRef(110);
+  const position = useRef(310);
   const nearbyRef = useRef<GhostId | null>(null);
   const speedRef = useRef(speed);
   const blockedRef = useRef(blocked);
@@ -84,7 +84,7 @@ function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcs
   const groundY = size.height * 0.74;
   const ghostX: Record<GhostId, number> = npcsSpread
     ? { lin: 600, jin: 720, gu: 840 }
-    : { lin: 650, jin: 690, gu: 730 };
+    : { lin: 430, jin: 540, gu: 650 };
   const ghostPositions = useRef(ghostX);
   ghostPositions.current = ghostX;
 
@@ -134,7 +134,9 @@ function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcs
         const viewportWidth = host.current.clientWidth;
         const cameraX = Math.max(0, Math.min(1400 - viewportWidth, position.current - viewportWidth * 0.35));
         player.current.style.left = `${position.current}px`;
-        player.current.style.transform = `translateX(-50%) scaleX(${direction.current < 0 ? -1 : 1})`;
+        if (direction.current !== 0) {
+          player.current.style.transform = `translateX(-50%) scaleX(${direction.current < 0 ? -1 : 1})`;
+        }
         player.current.classList.toggle('walking', direction.current !== 0);
         world.current.style.transform = `translate3d(${-cameraX}px,0,0)`;
         const nearest = (Object.entries(ghostPositions.current) as Array<[GhostId, number]>)
@@ -158,24 +160,17 @@ function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcs
 
   const move = (value: -1 | 0 | 1) => { direction.current = blockedRef.current ? 0 : value; };
   const prevent = (event: React.PointerEvent) => event.preventDefault();
-  const terrain = [
-    { x: 110, w: 76, h: 90 }, { x: 330, w: 110, h: 115 }, { x: 520, w: 76, h: 140 }, { x: 1020, w: 110, h: 90 }, { x: 1280, w: 76, h: 115 },
-  ];
   return <>
     <div className="world-viewport" ref={host} aria-label="奈何桥横版场景">
       <div className="world-layer" ref={world} style={{ width: 1400, backgroundColor }}>
-        {terrain.map((block, index) => <div className="bridge-silhouette" key={block.x} style={{ left: block.x, width: block.w, height: block.h, top: Math.max(10, groundY - block.h + (index % 2) * 15) }} />)}
-        <div className="river-blocks" style={{ top: groundY + 63 }} />
-        <div className="bridge-deck" style={{ top: groundY }} />
-        <div className="bridge-edge" style={{ top: groundY + 8 }} />
-        <div className="bridge-slats" style={{ top: groundY + 10 }}>
-          {Array.from({ length: 21 }, (_, index) => <i key={index} style={{ left: index * 96 }} />)}
-        </div>
-        {people.map((entry) => <div className={`world-ghost ghost-${entry.id} ${npcsSpread ? 'npc-settled' : 'npc-gathered'}`} key={entry.id} style={{ left: ghostX[entry.id], top: groundY - 77 }}>
-          <span className="ghost-label">{entry.name}</span><i className="ghost-head"/><i className="ghost-body"/><i className="ghost-feet"/>
+        <div className="bridge-upper" style={{ height: groundY }} />
+        <div className="bridge-lower" style={{ top: groundY }} />
+        {people.map((entry) => <div className={`world-ghost ghost-${entry.id} ${npcsSpread ? 'npc-settled' : 'npc-gathered'}`} key={entry.id} style={{ left: ghostX[entry.id] }}>
+          <span className="ghost-label">{entry.name}</span>
+          <img className="ghost-sprite" src={`./art-test/${entry.id}-standing.png`} alt="" draggable={false}/>
         </div>)}
-        <div className="world-player" ref={player} style={{ top: groundY - 77 }}>
-          <i className="player-head"/><i className="player-body"/><i className="player-apron"/><i className="player-feet"/>
+        <div className="world-player" ref={player}>
+          <i className="player-sprite"/>
         </div>
       </div>
     </div>
@@ -192,9 +187,7 @@ function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcs
 function VisualNovelDialogue({ line, index, total, onAdvance }: { line: StoryLine; index: number; total: number; onAdvance: () => void }) {
   const voice = voiceMeta[line.speaker];
   return <div className={`vn-dialogue voice-${line.speaker}`}>
-    <div className={`vn-bust bust-${voice.portrait}`} aria-label={`${voice.name}方块半身像`}>
-      <i className="bust-hair"/><i className="bust-head"/><i className="bust-neck"/><i className="bust-body"/><i className="bust-collar"/><i className="bust-sleeve left"/><i className="bust-sleeve right"/>
-    </div>
+    <img className="vn-bust" src={`./art-test/${voice.portrait}-portrait.png`} alt="" draggable={false}/>
     <div className="vn-box">
       <div className="vn-nameplate"><span className="eyebrow">奈何桥 · 对话</span><strong>{voice.name}</strong><small>{voice.role}</small><span className="dialogue-count">{String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</span></div>
       <p className="vn-text">{line.text}</p>
