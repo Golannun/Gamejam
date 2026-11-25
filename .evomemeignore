@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Local game assets, if added later
+assets/
+
+# Keep dist/ in the submission scope
+
+# Local secrets and generated logs
+.env
+.env.*
+!.env.example
+*.log
+
+# Tool and editor state
+.git/
+.codex/
+.cursor/
+.claude/
+.trae/
+.evomeme/

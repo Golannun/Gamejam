@@ -1,0 +1,9 @@
+{
+  "_game_name": "忘川录",
+  "_config_version": 1,
+  "ui_background": { "value": "#17161d", "type": "color", "label": "背景色" },
+  "ui_panel": { "value": "#24232c", "type": "color", "label": "面板色" },
+  "ui_accent": { "value": "#e3b86f", "type": "color", "label": "强调色" },
+  "ui_text": { "value": "#f3eee5", "type": "color", "label": "文字色" },
+  "move_speed": { "value": 230, "type": "int", "label": "移动速度", "min": 120, "max": 360 }
+}
