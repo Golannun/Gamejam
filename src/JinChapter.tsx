@@ -9,6 +9,40 @@ type Prop = { id: string; label: string; kind: string; x: number; y: number; clu
 type Tile = { x: number; y: number };
 const GRID_COLUMNS = 20;
 const GRID_ROWS = 12;
+type Facing = 'left' | 'right' | 'up' | 'down';
+const art = './chapter-three';
+const propArt: Record<string, string> = {
+  stove: 'room/cold-stove-and-rice-jar',
+  ledger: 'room/debt-ledger',
+  book: 'room/book-stand-arrangement',
+  altar: 'cave/altar-coin',
+  marks: 'cave/wall-marks',
+  register: 'cave/offering-register',
+  gate: 'room/right-door',
+};
+const roomArt = [
+  { name: 'window-curtains', x: 3, y: 4, width: 23 },
+  { name: 'book-cabinet', x: 30, y: 6, width: 24 },
+  { name: 'coin-wall-banner', x: 56, y: 8, width: 4 },
+  { name: 'bed', x: 73, y: 7, width: 20 },
+  { name: 'sideboard', x: 3, y: 24, width: 14 },
+  { name: 'small-potted-plant', x: 65, y: 17, width: 4 },
+  { name: 'rug-bed', x: 76, y: 31, width: 15 },
+  { name: 'window-light', x: 76, y: 62, width: 22 },
+  { name: 'rug-main', x: 31, y: 78, width: 36 },
+  { name: 'main-desk', x: 38, y: 88, width: 23 },
+  { name: 'table-lamp', x: 56, y: 80, width: 4 },
+  { name: 'loose-pages', x: 41, y: 89, width: 5 },
+  { name: 'abacus', x: 48, y: 89, width: 5 },
+  { name: 'low-bench', x: 71, y: 92, width: 14 },
+  { name: 'coin-chest-arrangement', x: 2, y: 83, width: 14 },
+  { name: 'tall-potted-plant', x: 1, y: 61, width: 6 },
+  { name: 'folding-screen', x: 94, y: 12, width: 6 },
+  { name: 'vines-top-left', x: 0, y: 0, width: 26 },
+  { name: 'vines-top-right', x: 80, y: 0, width: 20 },
+  { name: 'foreground-coins-left', x: 0, y: 88, width: 9 },
+  { name: 'foreground-coins-right', x: 91, y: 88, width: 9 },
+];
 
 const cast: Record<Speaker, { name: string; role: string; portrait: string }> = {
   mengpo: { name: '小孟婆', role: '新任引渡人', portrait: 'mengpo' },
@@ -93,6 +127,10 @@ const clueById: Record<string, Clue> = Object.fromEntries(Object.values(props).f
 export default function JinChapter({ onExit }: { onExit: () => void }) {
   const [scene, setScene] = useState<SceneId>('home');
   const [position, setPosition] = useState<Tile>({ x: 16, y: 8 });
+  const [facing, setFacing] = useState<Facing>('left');
+  const [walkFrame, setWalkFrame] = useState<number | null>(null);
+  const nextWalkFrame = useRef(0);
+  const stopWalkTimer = useRef<number | null>(null);
   const [jinPosition, setJinPosition] = useState<Tile>({ x: 17, y: 7 });
   const [jinVisible, setJinVisible] = useState(true);
   const [introActive, setIntroActive] = useState(true);
@@ -174,6 +212,11 @@ export default function JinChapter({ onExit }: { onExit: () => void }) {
       return;
     }
     movementLock.current = true;
+    setFacing(dx < 0 ? 'left' : dx > 0 ? 'right' : dy < 0 ? 'up' : 'down');
+    setWalkFrame(nextWalkFrame.current);
+    nextWalkFrame.current = (nextWalkFrame.current + 1) % 4;
+    if (stopWalkTimer.current !== null) window.clearTimeout(stopWalkTimer.current);
+    stopWalkTimer.current = window.setTimeout(() => setWalkFrame(null), 150);
     setPosition(next);
     window.setTimeout(() => { movementLock.current = false; }, 98);
   };
@@ -213,14 +256,18 @@ export default function JinChapter({ onExit }: { onExit: () => void }) {
   useEffect(() => {
     const timers: number[] = [];
     const later = (callback: () => void, delay: number) => { timers.push(window.setTimeout(callback, delay)); };
-    later(() => setPosition({ x: 15, y: 8 }), 480);
-    later(() => setPosition({ x: 14, y: 8 }), 720);
+    later(() => { setWalkFrame(0); setPosition({ x: 15, y: 8 }); }, 480);
+    later(() => { setWalkFrame(2); setPosition({ x: 14, y: 8 }); }, 720);
+    later(() => setWalkFrame(null), 850);
     later(() => showDialogue(arrivalLines, () => showDialogue(jinLeavesLines, () => {
       later(() => setJinPosition({ x: 18, y: 8 }), 240);
       later(() => setJinVisible(false), 630);
       later(() => setIntroActive(false), 670);
     })), 980);
-    return () => timers.forEach(window.clearTimeout);
+      return () => {
+        timers.forEach(window.clearTimeout);
+        if (stopWalkTimer.current !== null) window.clearTimeout(stopWalkTimer.current);
+      };
   }, []);
 
   useEffect(() => {
@@ -273,19 +320,24 @@ export default function JinChapter({ onExit }: { onExit: () => void }) {
     <div className="jin-frame">
       {scene !== 'bridge' ? <>
         <div className={`jin-map jin-map-${scene}`} aria-label={`${sceneName}固定格子地图`}>
-          <div className="map-wall wall-top"/><div className="map-wall wall-left"/><div className="map-wall wall-right"/>
-          {scene === 'home' ? <>
-            <div className="room-window block-decoration"/><div className="room-bed block-decoration"><i/></div>
-            <div className="room-rug block-decoration"/><div className="room-shelf block-decoration"><i/><i/><i/></div>
-            <div className="room-cabinet block-decoration"/><div className="room-mat block-decoration"/>
-          </> : <>
-            <div className="cave-pool block-decoration"/><div className="cave-stalagmite stalagmite-a block-decoration"/><div className="cave-stalagmite stalagmite-b block-decoration"/>
-            <div className="cave-shrine block-decoration"><i/><b/></div><div className="cave-glow block-decoration"/>
-          </>}
-          {currentProps.map((prop) => <button className={`jin-prop prop-${prop.kind} ${examined.includes(prop.id) ? 'prop-examined' : ''} ${nearProp?.id === prop.id ? 'prop-nearby' : ''}`} style={tileStyle(prop)} key={prop.id} onClick={() => actionRef.current.inspect(prop)} aria-label={`调查${prop.label}`}><i/><span>{prop.label}</span></button>)}
-          {exitProp && <button className={`jin-prop prop-gate ${nearProp?.id === exitProp.id ? 'prop-nearby' : ''}`} style={tileStyle(exitProp)} onClick={() => actionRef.current.inspect(exitProp)} aria-label={exitProp.label}><i/><span>{exitProp.label}</span></button>}
-          {scene === 'home' && jinVisible && <div className={`jin-actor jin-young ${jinPosition.x !== 17 ? 'jin-leaving' : ''}`} style={tileStyle(jinPosition)}><i/><b/><span>金万山（年轻时）</span></div>}
-          <div className={`jin-actor jin-player ${scene === 'home' && introActive ? 'jin-walking' : ''}`} style={tileStyle(position)} aria-label="小孟婆"><i/><b/><span>小孟婆</span></div>
+          {scene === 'home' ? roomArt.map(({ name, x, y, width }) => (
+            <img className={`jin-scenery ${name.startsWith('foreground-') || name === 'folding-screen' ? 'jin-foreground' : ''}`} key={name} src={`${art}/room/${name}.png`} style={{ left: `${x}%`, top: `${y}%`, width: `${width}%` }} alt="" draggable={false}/>
+          )) : <img className="jin-scenery cave-scatter" src={`${art}/cave/paper-and-coins.png`} alt="" draggable={false}/>}
+          {currentProps.map((prop) => <button className={`jin-prop prop-${prop.kind} ${examined.includes(prop.id) ? 'prop-examined' : ''} ${nearProp?.id === prop.id ? 'prop-nearby' : ''}`} style={tileStyle(prop)} key={prop.id} onClick={() => actionRef.current.inspect(prop)} aria-label={`调查${prop.label}`}>
+            {prop.kind === 'ledger' && <img className="jin-prop-surface" src={`${art}/room/small-cabinet.png`} alt="" draggable={false}/>}
+            <img className="jin-prop-art" src={`${art}/${propArt[prop.kind]}.png`} alt="" draggable={false}/>
+            {!examined.includes(prop.id) && <img className="jin-marker" src={`${art}/ui/investigate-marker.png`} alt=""/>}
+            <span>{prop.label}</span>
+          </button>)}
+          {exitProp && <button className={`jin-prop prop-gate ${nearProp?.id === exitProp.id ? 'prop-nearby' : ''}`} style={tileStyle(exitProp)} onClick={() => actionRef.current.inspect(exitProp)} aria-label={exitProp.label}><img className="jin-prop-art" src={`${art}/${propArt.gate}.png`} alt="" draggable={false}/><span>{exitProp.label}</span></button>}
+          {scene === 'home' && jinVisible && <div className={`jin-actor jin-young ${jinPosition.x !== 17 ? 'jin-leaving' : ''}`} style={tileStyle(jinPosition)}><img src="./art-test/jin-standing.png" alt="" draggable={false}/><span>金万山（年轻时）</span></div>}
+          <div className="jin-actor jin-player" style={tileStyle(position)} aria-label="小孟婆">
+            <div className="jin-player-art" style={{
+              backgroundImage: `url('${art}/mengpo/${facing}-${walkFrame === null ? 'idle' : 'walk'}.png')`,
+              backgroundSize: walkFrame === null ? '100% 100%' : '400% 100%',
+              backgroundPosition: walkFrame === null ? '0 0' : `${walkFrame * 100 / 3}% 0`,
+            }}/>
+          </div>
         </div>
         <header className="jin-hud"><button className="jin-back" onClick={onExit}>← 返回章节</button><div><small>第三章 · 记忆调查</small><strong>{sceneName}</strong></div><button className="jin-bag-button" onClick={() => setInventoryOpen(true)}>背包 <b>{inventory.length}</b></button></header>
         {!leaveOptions && <aside className="jin-objective"><small>调查线索</small><strong>{scene === 'home' ? '他为何走上邪术之路？' : '仪式背后还有什么代价？'}</strong><span>{completed} / {currentProps.length} 已调查</span><div className="objective-dots">{currentProps.map((prop) => <i className={examined.includes(prop.id) ? 'done' : ''} key={prop.id}/>)}</div><p>{scene === 'home' ? '调查屋内三处物件，开启通往山洞的路。' : '调查祭坛、刻痕与名册，还原契约真相。'}</p></aside>}
