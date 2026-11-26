@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import JinChapter from './JinChapter';
 import './style.css';
 
 type GhostId = 'lin' | 'jin' | 'gu';
-type Phase = 'menu' | 'settings' | 'diary' | 'prologue' | 'explore' | 'vote' | 'ending';
+type Phase = 'menu' | 'settings' | 'diary' | 'prologue' | 'explore' | 'vote' | 'ending' | 'jinChapter';
 type Config = {
   ui_background?: { value: string };
   ui_panel?: { value: string };
@@ -284,7 +285,10 @@ function App() {
 
   return <main className="app" style={palette}>
     {phase === 'menu' && <section className="menu-screen">
-      <div className="menu-copy"><div className="eyebrow">忘川 · 第一章</div><h1>忘川录</h1><p className="subtitle">两碗孟婆汤</p><p className="menu-description">奈何桥上，三位亡魂等着转世。<br/>锅中剩下的汤，只够两个人喝。</p><div className="menu-actions"><button className="primary menu-primary" onClick={beginGame}>开始游戏 <span>→</span></button><button className="quiet-button" onClick={() => setPhase('settings')}>设置 <span>＋</span></button></div><div className="menu-controls">横屏游玩　·　键盘 / 触屏移动</div></div>
+      <div className="menu-copy"><div className="eyebrow">忘川 · 记忆录</div><h1>忘川录</h1><p className="subtitle">亡魂未尽的人间事</p><p className="menu-description">选择一段记忆进入，继续调试章节内容。</p><div className="menu-chapters">
+        <button className="chapter-entry" onClick={beginGame}><span className="chapter-index">第一章</span><span className="chapter-title">两碗孟婆汤</span><small>奈何桥 · 对话与投票</small><b>→</b></button>
+        <button className="chapter-entry chapter-debug" onClick={() => setPhase('jinChapter')}><span className="chapter-index">第三章 · 调试入口</span><span className="chapter-title">金万山的记忆</span><small>家中探索 · 山洞祭祀 · 背包</small><b>→</b></button>
+      </div><div className="menu-actions"><button className="quiet-button" onClick={() => setPhase('settings')}>设置 <span>＋</span></button></div><div className="menu-controls">横屏游玩　·　键盘 / 触屏移动</div></div>
       <div className="menu-block-scene" aria-hidden="true"><div className="menu-slab slab-one"/><div className="menu-slab slab-two"/><div className="menu-slab slab-three"/><div className="menu-player"><i/><b/></div><span>奈何桥</span></div>
       <div className="menu-corner">WANGCHUAN CHRONICLES <b>·</b> PROTOTYPE</div>
     </section>}
@@ -305,6 +309,7 @@ function App() {
     </section>}
 
     {phase === 'ending' && <section className="chapter-end"><div className="end-seal">忘川</div><h2>第一章终了</h2><span className="end-rule"/><button className="ending-return" onClick={() => setPhase('menu')}>返回标题</button></section>}
+    {phase === 'jinChapter' && <JinChapter onExit={() => setPhase('menu')}/>}
   </main>;
 }
 

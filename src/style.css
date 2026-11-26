@@ -21,6 +21,15 @@ button { cursor: pointer; }
 .menu-description { color: #beb8b1; font: 13px/2 'Songti SC', 'SimSun', serif; letter-spacing: .04em; margin: 0 0 25px 4px; }
 .menu-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; }
 .menu-primary { min-width: 205px; }
+.menu-chapters { display: grid; width: min(310px, 100%); gap: 9px; }
+.chapter-entry { position: relative; min-height: 76px; padding: 10px 43px 10px 13px; display: grid; grid-template-columns: 1fr; gap: 3px; text-align: left; color: var(--ink); border: 1px solid #ffffff32; background: #24232ce8; transition: border-color .15s, background .15s, transform .15s; }
+.chapter-entry:hover { border-color: var(--accent); background: #302d35; transform: translateX(2px); }
+.chapter-index { color: var(--accent); font-size: 9px; letter-spacing: .13em; }
+.chapter-title { font: 500 15px 'Songti SC', 'SimSun', serif; letter-spacing: .06em; }
+.chapter-entry small { color: #99939b; font-size: 9px; }
+.chapter-entry > b { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 17px; font-weight: 400; }
+.chapter-debug { border-style: dashed; }
+.chapter-debug .chapter-index { color: #c6a97c; }
 .quiet-button { min-height: 38px; padding: 0 15px; border: 1px solid transparent; background: transparent; color: #c3bdba; font-size: 12px; letter-spacing: .1em; }
 .quiet-button span { color: var(--accent); margin-left: 18px; }
 .menu-controls { color: #77727c; font-size: 9px; letter-spacing: .14em; margin: 25px 0 0 4px; }
@@ -73,8 +82,8 @@ button { cursor: pointer; }
 .world-viewport { position: absolute; inset: 0; overflow: hidden; container-type: size; }
 .world-layer { position: absolute; left: 0; top: 0; height: 100%; overflow: hidden; will-change: transform; }
 .bridge-upper, .bridge-lower { position: absolute; inset-inline: 0; background-size: 100% 100%; }
-.bridge-upper { top: 0; background-image: url('/art-test/bridge-upper.jpg'); }
-.bridge-lower { bottom: 0; background-image: url('/art-test/bridge-lower.jpg'); }
+.bridge-upper { top: 0; background-image: url('../public/art-test/bridge-upper.jpg'); }
+.bridge-lower { bottom: 0; background-image: url('../public/art-test/bridge-lower.jpg'); }
 .world-ghost, .world-player {
   --actor-height: min(231px, 37cqh, 35cqw);
   position: absolute;
@@ -91,7 +100,7 @@ button { cursor: pointer; }
 .world-player { width: calc(var(--actor-height) * 48 / 77); z-index: 3; }
 .player-sprite {
   inset: 0;
-  background: url('/art-test/mengpo-steps.png') 0 0 / 700% 100% no-repeat;
+  background: url('../public/art-test/mengpo-steps.png') 0 0 / 700% 100% no-repeat;
   filter: drop-shadow(0 1px 2px #17140db3);
 }
 .world-player.walking .player-sprite { animation: paper-walk 1s step-end infinite; }
