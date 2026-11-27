@@ -194,12 +194,11 @@ function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcs
   const speedRef = useRef(speed);
   const blockedRef = useRef(blocked);
   const callbacks = useRef({ onNearby, onTalk });
-  const [size, setSize] = useState({ width: 0, height: 0 });
+  const bridgeScale = useRef(1);
   speedRef.current = speed;
   blockedRef.current = blocked;
   callbacks.current = { onNearby, onTalk };
   const person = people.find((entry) => entry.id === nearby);
-  const groundY = size.height * 0.74;
   const ghostX: Record<GhostId, number> = chapterTwo
     ? interviewPerson === 'lin' ? { lin: 430, jin: 1080, gu: 1290 }
       : interviewPerson === 'jin' ? { lin: 90, jin: 690, gu: 1290 }
@@ -216,7 +215,9 @@ function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcs
   useEffect(() => {
     const hostNode = host.current;
     if (!hostNode) return;
-    const observer = new ResizeObserver(([entry]) => setSize({ width: entry.contentRect.width, height: entry.contentRect.height }));
+    const observer = new ResizeObserver(([entry]) => {
+      bridgeScale.current = entry.contentRect.width / 1280;
+    });
     observer.observe(hostNode);
     return () => observer.disconnect();
   }, []);
@@ -256,14 +257,14 @@ function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcs
       if (player.current && world.current && host.current) {
         if (blockedRef.current) direction.current = 0;
         position.current = Math.max(38, Math.min(1362, position.current + direction.current * speedRef.current * elapsed / 1000));
-        const viewportWidth = host.current.clientWidth;
+        const viewportWidth = 1280;
         const cameraX = Math.max(0, Math.min(1400 - viewportWidth, position.current - viewportWidth * 0.35));
         player.current.style.left = `${position.current}px`;
         if (direction.current !== 0) {
           player.current.style.transform = `translateX(-50%) scaleX(${direction.current < 0 ? -1 : 1})`;
         }
         player.current.classList.toggle('walking', direction.current !== 0);
-        world.current.style.transform = `translate3d(${-cameraX}px,0,0)`;
+        world.current.style.transform = `scale(${bridgeScale.current}) translate3d(${-cameraX}px,0,0)`;
         const nearest = (Object.entries(ghostPositions.current) as Array<[GhostId, number]>)
           .filter(([id]) => allowedPeopleRef.current.includes(id))
           .map(([id, x]) => ({ id, distance: Math.abs(x - position.current) }))
@@ -289,8 +290,8 @@ function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcs
   return <>
     <div className="world-viewport" ref={host} aria-label="奈何桥横版场景">
       <div className="world-layer" ref={world} style={{ width: 1400, backgroundColor }}>
-        <div className="bridge-upper" style={{ height: groundY }} />
-        <div className="bridge-lower" style={{ top: groundY }} />
+        <div className="bridge-upper" />
+        <div className="bridge-lower" />
         {people.map((entry) => <div className={`world-ghost ghost-${entry.id} ${npcsSpread ? 'npc-settled' : 'npc-gathered'}`} key={entry.id} style={{ left: ghostX[entry.id] }}>
           <span className="ghost-label">{entry.name}</span>
           <img className="ghost-sprite" src={`./art-test/${entry.id}-standing.png`} alt="" draggable={false}/>

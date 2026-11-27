@@ -80,12 +80,16 @@ button { cursor: pointer; }
 .diary-footer .primary { min-height: 37px; }
 
 /* Walkable bridge scene */
-.explore-screen { position: absolute; inset: 0; overflow: hidden; background: #1a1920; }
-.world-viewport { position: absolute; inset: 0; overflow: hidden; container-type: size; }
-.world-layer { position: absolute; left: 0; top: 0; height: 100%; overflow: hidden; will-change: transform; }
+.explore-screen {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(100%, calc(100dvh * 16 / 9)); aspect-ratio: 16 / 9;
+  overflow: hidden; background: #1a1920; container-type: size;
+}
+.world-viewport { position: absolute; inset: 0; overflow: hidden; }
+.world-layer { position: absolute; left: 0; top: 0; height: 720px; overflow: hidden; transform-origin: top left; will-change: transform; container-type: size; }
 .bridge-upper, .bridge-lower { position: absolute; inset-inline: 0; background-size: 100% 100%; }
-.bridge-upper { top: 0; background-image: url('../public/art-test/bridge-upper.jpg'); }
-.bridge-lower { bottom: 0; background-image: url('../public/art-test/bridge-lower.jpg'); }
+.bridge-upper { top: 0; height: 74%; background-image: url('../public/art-test/bridge-upper.jpg'); }
+.bridge-lower { top: 74%; bottom: 0; background-image: url('../public/art-test/bridge-lower.jpg'); }
 .world-ghost, .world-player {
   --actor-height: min(231px, 37cqh, 35cqw);
   position: absolute;
