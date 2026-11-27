@@ -16,6 +16,7 @@ const SCENE_TWO_START = SCENE_WIDTH + ROAD_WIDTH;
 const SCENE_THREE_START = SCENE_TWO_START + SCENE_WIDTH + ROAD_WIDTH;
 const MAP_WIDTH = SCENE_THREE_START + SCENE_WIDTH;
 const ZONE_WIDTH = SCENE_WIDTH;
+const VIEW_WIDTH = 1280;
 
 const cast: Record<Speaker, { name: string; role: string; color: string; clothes: string; portrait?: string }> = {
   mengpo: { name: '小孟婆', role: '新任引渡人', color: '#e6cba8', clothes: '#9e6552', portrait: 'mengpo' },
@@ -268,11 +269,12 @@ export default function LinMemoryChapter({
                 : MAP_WIDTH - 65;
           playerX.current = Math.max(65, Math.min(limit, playerX.current + direction.current * 225 * elapsed / 1000));
         } else direction.current = 0;
-        const cameraX = Math.max(0, Math.min(MAP_WIDTH - viewport.clientWidth, playerX.current - viewport.clientWidth * 0.39));
+        const scale = viewport.clientWidth / VIEW_WIDTH;
+        const cameraX = Math.max(0, Math.min(MAP_WIDTH - VIEW_WIDTH, playerX.current - VIEW_WIDTH * 0.39));
         player.style.left = `${playerX.current}px`;
         player.style.transform = `translateX(-50%) scaleX(${direction.current < 0 ? -1 : 1})`;
         player.classList.toggle('walking', direction.current !== 0);
-        world.style.transform = `translate3d(${-cameraX}px,0,0)`;
+        world.style.transform = `scale(${scale}) translate3d(${-cameraX}px,0,0)`;
         const zone = playerX.current < SCENE_WIDTH ? 0 : playerX.current < SCENE_TWO_START ? 1 : playerX.current < SCENE_THREE_START ? 2 : playerX.current < SCENE_THREE_START + SCENE_WIDTH ? 3 : 4;
         if (zone !== zoneRef.current) { zoneRef.current = zone; setZoneIndex(zone); }
         const stageVignettes: VignetteId[] = progressRef.current === 1 ? ['searchFailed', 'mediaInvite'] : progressRef.current === 2 ? ['donation', 'eventFocus'] : [];
@@ -335,20 +337,17 @@ export default function LinMemoryChapter({
       {location === 'memory' ? <>
       <div className="lin-memory-world" ref={worldRef} style={{ width: MAP_WIDTH }}>
         <div className="lin-memory-zone lin-zone-street" style={{ left: 0, width: ZONE_WIDTH }}>
-          <div className="street-building building-left"/><div className="street-building building-right"/>
-          <div className="street-sign">旧城区 · 傍晚</div><div className="lost-poster poster-one">寻人启事<br/><small>如有线索请联系</small></div><div className="lost-poster poster-two">寻人启事</div>
-          <div className="street-pole pole-one"/><div className="street-pole pole-two"/><div className="memory-ground"/>
+          <div className="memory-ground"/>
           <BlockActor name="记忆中的林秀" role="lin" left={linSceneOneX} walking={linWalking} transitionDuration={chaseDuration}/><BlockActor name="路人" role="passerby" left={700}/>
           <div className="memory-target-tag" style={{ left: 500 }}>记忆中的林秀 <b>E</b></div>
         </div>
+        <div className="lin-street-road-art" style={{ left: SCENE_WIDTH - 180, width: ROAD_WIDTH + 180 }} aria-hidden="true"/>
         <div className="lin-memory-fragment-road road-one" style={{ left: SCENE_WIDTH, width: ROAD_WIDTH }} aria-label="连接记忆片段的碎忆长路">
-          <div className="memory-ground"/><i className="memory-shard shard-one">寻人启事</i><i className="memory-shard shard-two">孩子，你在哪里</i><i className="memory-shard shard-three">旧照片</i>
           <BlockActor name="林秀 · 寻人无果" role="lin" left={250}/><BlockActor name="邻居" role="passerby" left={350}/><div className="memory-target-tag" style={{ left: 250 }}>寻人无果 <b>E</b></div>
           <BlockActor name="林秀 · 接到邀请" role="lin" left={850}/><BlockActor name="节目工作人员" role="staff" left={960}/><div className="memory-target-tag" style={{ left: 850 }}>节目邀请 <b>E</b></div>
         </div>
         <div className="lin-memory-zone lin-zone-studio" style={{ left: SCENE_TWO_START, width: ZONE_WIDTH }}>
-          <div className="studio-curtain"/><div className="studio-banner">寻亲进行时</div><div className="studio-light light-one"/><div className="studio-light light-two"/>
-          <div className="studio-camera"><i/><b/></div><div className="studio-desk"/><div className="memory-ground"/>
+          <div className="studio-banner">寻亲进行时</div><div className="memory-ground"/>
           <BlockActor name="林秀" role="lin" left={570}/><BlockActor name="主持人" role="host" left={750}/>
           <div className="memory-target-tag" style={{ left: 650 }}>采访片段 <b>E</b></div>
         </div>
@@ -358,13 +357,23 @@ export default function LinMemoryChapter({
           <BlockActor name="林秀 · 多年后" role="lin" left={850}/><BlockActor name="工作人员" role="staff" left={960}/><div className="memory-target-tag" style={{ left: 850 }}>活动与线索 <b>E</b></div>
         </div>
         <div className="lin-memory-zone lin-zone-office" style={{ left: SCENE_THREE_START, width: ZONE_WIDTH }}>
-          <div className="office-window"/><div className="office-board"><span>寻人线索</span><i/><i/><i/></div><div className="office-shelf"/><div className="office-desk"/><div className="memory-ground"/>
+          <div className="memory-ground"/>
           {(Object.entries(clueMeta) as Array<[ClueId, Clue]>).map(([id, clue]) => <button key={id} className={`lin-clue lin-clue-${clue.kind} ${investigated.includes(id) ? 'clue-done' : ''}`} style={{ left: clue.x - SCENE_THREE_START }} onClick={() => interactRef.current(id)} aria-label={`调查${clue.label}`}>
+            <img src={`./lin-memory/archive-${id}.png`} alt="" draggable={false}/>
             <i>{investigated.includes(id) ? '✓' : '?'}</i><b>{clue.label}</b>
           </button>)}
         </div>
-        <div className="zone-seam seam-one" style={{ left: SCENE_WIDTH }}/><div className="zone-seam seam-two" style={{ left: SCENE_TWO_START }}/><div className="zone-seam seam-one" style={{ left: SCENE_TWO_START + SCENE_WIDTH }}/><div className="zone-seam seam-two" style={{ left: SCENE_THREE_START }}/>
-        <div className="lin-player" ref={playerRef} aria-label="小孟婆"><i/><b/><span>小孟婆</span></div>
+        <div className="lin-player" ref={playerRef} aria-label="小孟婆"><i className="lin-mengpo-sprite"/><span>小孟婆</span></div>
+        {([
+          ['studio', SCENE_TWO_START],
+          ['fragment', SCENE_TWO_START + SCENE_WIDTH],
+          ['archive', SCENE_THREE_START],
+        ] as const).map(([scene, boundary]) => (
+          <div className={`lin-scene-fade lin-scene-fade-${scene}`} key={scene} style={{ left: boundary - 180 }} aria-hidden="true"/>
+        ))}
+        {[SCENE_WIDTH, SCENE_TWO_START, SCENE_TWO_START + SCENE_WIDTH, SCENE_THREE_START].map((boundary, index) => (
+          <img className={`lin-paper-tear ${index % 2 ? 'lin-paper-tear-reversed' : ''}`} key={boundary} src="./lin-memory/paper-tear.png" style={{ left: boundary }} alt="" draggable={false}/>
+        ))}
       </div>
       </> : <div className="bridge-memory" aria-label="第一章奈何桥场景">
         <img className="bridge-upper lin-bridge-background lin-bridge-upper" src="./art-test/bridge-upper.jpg" alt="" draggable={false}/>
@@ -397,5 +406,8 @@ export default function LinMemoryChapter({
 }
 
 function BlockActor({ name, role, left, walking = false, transitionDuration }: { name: string; role: string; left: number; walking?: boolean; transitionDuration?: number }) {
-  return <div className={`memory-actor actor-${role} ${walking ? 'actor-walking' : ''}`} style={{ left, transitionDuration: transitionDuration === undefined ? undefined : `${transitionDuration}ms`, transitionTimingFunction: transitionDuration === undefined ? undefined : 'linear' }} aria-label={name}><i/><b/><span>{name}</span></div>;
+  return <div className={`memory-actor actor-${role} ${walking ? 'actor-walking' : ''}`} style={{ left, transitionDuration: transitionDuration === undefined ? undefined : `${transitionDuration}ms`, transitionTimingFunction: transitionDuration === undefined ? undefined : 'linear' }} aria-label={name}>
+    {role === 'lin' ? <img className="lin-memory-sprite" src="./lin-memory/lin-side-standing.png" alt="" draggable={false}/> : <><i/><b/></>}
+    <span>{name}</span>
+  </div>;
 }
