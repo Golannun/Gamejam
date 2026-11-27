@@ -21,8 +21,8 @@ button { cursor: pointer; }
 .menu-description { color: #beb8b1; font: 13px/2 'Songti SC', 'SimSun', serif; letter-spacing: .04em; margin: 0 0 25px 4px; }
 .menu-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; }
 .menu-primary { min-width: 205px; }
-.menu-chapters { display: grid; width: min(310px, 100%); gap: 9px; }
-.chapter-entry { position: relative; min-height: 76px; padding: 10px 43px 10px 13px; display: grid; grid-template-columns: 1fr; gap: 3px; text-align: left; color: var(--ink); border: 1px solid #ffffff32; background: #24232ce8; transition: border-color .15s, background .15s, transform .15s; }
+.menu-chapters { display: grid; width: min(330px, 100%); gap: 7px; }
+.chapter-entry { position: relative; min-height: 67px; padding: 8px 43px 8px 13px; display: grid; grid-template-columns: 1fr; gap: 2px; text-align: left; color: var(--ink); border: 1px solid #ffffff32; background: #24232ce8; transition: border-color .15s, background .15s, transform .15s; }
 .chapter-entry:hover { border-color: var(--accent); background: #302d35; transform: translateX(2px); }
 .chapter-index { color: var(--accent); font-size: 9px; letter-spacing: .13em; }
 .chapter-title { font: 500 15px 'Songti SC', 'SimSun', serif; letter-spacing: .06em; }
@@ -30,6 +30,8 @@ button { cursor: pointer; }
 .chapter-entry > b { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 17px; font-weight: 400; }
 .chapter-debug { border-style: dashed; }
 .chapter-debug .chapter-index { color: #c6a97c; }
+.chapter-interview .chapter-index { color: #a9c8bf; }
+.chapter-lin-entry .chapter-index { color: #c5ad88; }
 .quiet-button { min-height: 38px; padding: 0 15px; border: 1px solid transparent; background: transparent; color: #c3bdba; font-size: 12px; letter-spacing: .1em; }
 .quiet-button span { color: var(--accent); margin-left: 18px; }
 .menu-controls { color: #77727c; font-size: 9px; letter-spacing: .14em; margin: 25px 0 0 4px; }
@@ -125,6 +127,21 @@ button { cursor: pointer; }
 .interact-button b { font-size: 10px; }
 .call-vote { position: absolute; z-index: 3; right: 18px; top: 66px; padding: 10px 13px; border: 1px solid var(--accent); background: #24232cf0; color: var(--ink); font-size: 10px; }
 .call-vote span { color: var(--accent); margin-left: 12px; }
+.interview-choice-panel { position: absolute; z-index: 7; top: 25%; left: 50%; transform: translateX(-50%); width: min(650px, 80%); padding: clamp(18px, 3vw, 28px); border: 1px solid #d8c39b88; background: #1d1b22f2; box-shadow: 0 15px 50px #0008; }
+.interview-choice-panel > small { color: var(--accent); font-size: 9px; letter-spacing: .16em; }
+.interview-choice-panel h2 { margin: 8px 0 14px; color: #f0e7d6; font: 500 clamp(20px, 3vw, 29px) 'Songti SC', serif; letter-spacing: .08em; }
+.interview-choice-panel > button { position: relative; width: 100%; min-height: 66px; margin-top: 9px; padding: 10px 110px 10px 52px; display: flex; align-items: center; text-align: left; border: 1px solid #ffffff38; background: #29262d; color: var(--ink); }
+.interview-choice-panel > button:hover { border-color: var(--accent); background: #353039; }
+.interview-choice-panel > button b { position: absolute; left: 15px; color: #e5c893; font: 500 16px 'Songti SC', serif; }
+.interview-choice-panel > button span { color: #eee7dc; font: 12px/1.7 'Songti SC', serif; }
+.interview-choice-panel > button i { position: absolute; right: 14px; color: #a89a80; font-size: 10px; font-style: normal; white-space: nowrap; }
+.explore-screen:has(.chapter-two-scoreboard) .world-hint { display: none; }
+.chapter-two-scoreboard { position: absolute; z-index: 4; top: 72px; right: 18px; width: min(270px, 28vw); padding: 13px 15px 11px; border: 1px solid #ffffff28; background: #17161de8; box-shadow: 0 6px 24px #0003; }
+.chapter-two-scoreboard > .eyebrow { font-size: 8px; }
+.chapter-two-scoreboard > strong { display: block; margin: 7px 0 5px; font: 500 14px 'Songti SC', 'SimSun', serif; }
+.chapter-two-scoreboard ul { margin: 0; padding: 8px 0; list-style: none; border-top: 1px solid #ffffff1a; }
+.chapter-two-scoreboard li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; color: #d5cfc8; font-size: 10px; }
+.chapter-two-scoreboard li span, .chapter-two-scoreboard > small { color: #a89a80; font-size: 9px; }
 .vn-dialogue { position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; height: clamp(175px, 34vh, 275px); min-height: 175px; border-top: 1px solid #ffffff46; background: #211f28f5; box-shadow: 0 -12px 45px #0004; }
 .vn-box { position: relative; z-index: 2; height: 100%; padding: 22px clamp(18px, 5vw, 65px) 15px clamp(175px, 28vw, 380px); display: flex; flex-direction: column; background: linear-gradient(90deg, #211f28dd, #211f28f7 35%); }
 .vn-nameplate { min-height: 31px; display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid #ffffff22; padding-bottom: 9px; }
@@ -196,6 +213,9 @@ button { cursor: pointer; }
   .subtitle { margin-bottom: 13px; }
   .menu-description { margin-bottom: 14px; font-size: 11px; }
   .menu-controls { margin-top: 13px; }
+  .menu-chapters { gap: 5px; }
+  .chapter-entry { min-height: 54px; padding-top: 5px; padding-bottom: 5px; }
+  .chapter-entry small { font-size: 8px; }
   .menu-block-scene { height: 58vh; min-height: 190px; }
   .walk-hud { top: 8px; left: 9px; min-height: 29px; padding: 0 8px; gap: 6px; font-size: 8px; }
   .walk-hud small { font-size: 8px; margin-left: 3px; }
@@ -214,6 +234,15 @@ button { cursor: pointer; }
   .vn-footer .primary { min-height: 30px; }
   .vn-bust { width: max(125px, min(23vw, 200px)); }
   .call-vote { right: 9px; top: 46px; }
+  .interview-choice-panel { top: 15%; width: 86%; padding: 12px; }
+  .interview-choice-panel h2 { margin: 5px 0 8px; font-size: 18px; }
+  .interview-choice-panel > button { min-height: 47px; margin-top: 5px; padding: 6px 80px 6px 38px; }
+  .interview-choice-panel > button b { left: 10px; font-size: 13px; }
+  .interview-choice-panel > button span { font-size: 9px; }
+  .interview-choice-panel > button i { right: 9px; font-size: 8px; }
+  .chapter-two-scoreboard { top: 44px; right: 9px; width: min(230px, 36vw); padding: 8px 9px; }
+  .chapter-two-scoreboard > strong { margin: 4px 0; font-size: 12px; }
+  .chapter-two-scoreboard li { padding: 3px 0; font-size: 9px; }
   .modal-card { padding: 18px 24px; }
   .modal-card h2 { margin: 8px 0; font-size: 26px; }
   .modal-card > p { margin-bottom: 13px; font-size: 11px; }
@@ -223,4 +252,19 @@ button { cursor: pointer; }
 
 @media (orientation: portrait) and (max-width: 600px) {
   .app::after { content: '请将设备横向放置'; position: absolute; z-index: 20; inset: 0; display: grid; place-items: center; background: var(--bg); color: var(--ink); font: 20px 'Songti SC', 'SimSun', serif; letter-spacing: .15em; }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .menu-screen { padding: 8px 6vw 20px; }
+  .menu-copy { max-height: 100%; overflow-y: auto; }
+  .menu-copy h1 { margin-top: 4px; font-size: clamp(32px, 8vh, 48px); }
+  .subtitle { margin-bottom: 8px; font-size: 15px; }
+  .menu-description { margin-bottom: 9px; font-size: 10px; line-height: 1.5; }
+  .menu-chapters { gap: 4px; }
+  .chapter-entry { min-height: 46px; padding-block: 4px; gap: 1px; }
+  .chapter-index, .chapter-entry small { font-size: 7px; }
+  .chapter-title { font-size: 12px; }
+  .menu-actions { gap: 3px; }
+  .quiet-button { min-height: 30px; }
+  .menu-controls { margin-top: 7px; font-size: 7px; }
 }

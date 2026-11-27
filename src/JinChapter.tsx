@@ -124,7 +124,7 @@ const props: Record<'home' | 'cave', Prop[]> = {
 };
 const clueById: Record<string, Clue> = Object.fromEntries(Object.values(props).flatMap((scene) => scene.flatMap((prop) => prop.clue ? [[prop.clue.id, prop.clue]] : [])));
 
-export default function JinChapter({ onExit }: { onExit: () => void }) {
+export default function JinChapter({ onExit, initialAffinity = 0 }: { onExit: () => void; initialAffinity?: number }) {
   const [scene, setScene] = useState<SceneId>('home');
   const [position, setPosition] = useState<Tile>({ x: 16, y: 8 });
   const [facing, setFacing] = useState<Facing>('left');
@@ -356,8 +356,8 @@ export default function JinChapter({ onExit }: { onExit: () => void }) {
           <div className="bridge-caption">金万山的记忆已经结束</div>
         </div>
         <header className="bridge-memory-header"><button className="jin-back" onClick={onExit}>← 返回章节</button><span>奈何桥 · 第一章</span></header>
-        {!activeLine && !bridgeFinished && <section className="bridge-choice-panel"><small>孟婆汤前 · 最后的回应</small><h2>你会如何回应金万山？</h2><button onClick={() => chooseResponse(1)}><b>质问他</b><span>你明明知道会伤害无辜的人，却还是一次次献祭。</span><i>倾向值 +1</i></button><button onClick={() => chooseResponse(2)}><b>理解他的恐惧</b><span>你害怕契约惩罚，我能理解；但不能把别人的性命交出去。</span><i>倾向值 +2</i></button></section>}
-        {bridgeFinished && <section className="bridge-finished"><small>小孟婆的回应 · 倾向值 +{bridgePoints}</small><h2>这段记忆暂告一段落</h2><button onClick={onExit}>返回章节选择</button></section>}
+        {!activeLine && !bridgeFinished && <section className="bridge-choice-panel"><small>孟婆汤前 · 前章倾向 +{initialAffinity} · 最后的回应</small><h2>你会如何回应金万山？</h2><button onClick={() => chooseResponse(1)}><b>质问他</b><span>你明明知道会伤害无辜的人，却还是一次次献祭。</span><i>本次 +1</i></button><button onClick={() => chooseResponse(2)}><b>理解他的恐惧</b><span>你害怕契约惩罚，我能理解；但不能把别人的性命交出去。</span><i>本次 +2</i></button></section>}
+        {bridgeFinished && <section className="bridge-finished"><small>本次 +{bridgePoints} · 金万山累计倾向 +{initialAffinity + bridgePoints}</small><h2>这段记忆暂告一段落</h2><button onClick={onExit}>返回章节选择</button></section>}
       </>}
 
       {scene === 'cave' && leaveOptions && !activeLine && <aside className="jin-departure-options"><small>调查完成</small><strong>接下来要？</strong><button onClick={() => chooseDeparture(true)}><b>出去吧</b><span>是时候回去了</span></button><button onClick={() => chooseDeparture(false)}><b>再调查一下</b><span>还是再调查一下吧</span></button></aside>}
