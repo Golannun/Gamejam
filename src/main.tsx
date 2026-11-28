@@ -6,7 +6,7 @@ import GuMemoryChapter from './GuMemoryChapter';
 import './style.css';
 
 type GhostId = 'lin' | 'jin' | 'gu';
-type Phase = 'menu' | 'settings' | 'diary' | 'prologue' | 'explore' | 'vote' | 'ending' | 'chapterTwo' | 'jinChapter' | 'linMemory' | 'guMemory';
+type Phase = 'menu' | 'settings' | 'diary' | 'prologue' | 'explore' | 'vote' | 'ending' | 'chapterTwo' | 'chapterTwoEnding' | 'jinChapter' | 'linMemory' | 'guMemory';
 type Config = {
   ui_background?: { value: string };
   ui_panel?: { value: string };
@@ -18,6 +18,14 @@ type Config = {
   gu_early_shake_interval?: { value: number };
   gu_early_shake_strength?: { value: number };
   lin_chase_speed?: { value: number };
+  audio_music_enabled?: { value: boolean };
+  bgm_volume?: { value: number };
+  bgm_chapter_one?: { value: string };
+  bgm_chapter_two?: { value: string };
+  image_diary_backdrop?: { value: string };
+  image_diary_paper?: { value: string };
+  image_ui_dialogue?: { value: string };
+  image_ui_option?: { value: string };
 };
 type DialogueLine = { speaker: 'mengpo' | 'npc'; text: string };
 type Person = { id: GhostId; name: string; role: string; dialogue: DialogueLine[] };
@@ -27,19 +35,30 @@ type QuestionId = 'A' | 'B';
 type InterviewQuestion = { text: string; score: number; lines: StoryLine[] };
 type InterviewScript = { opening: StoryLine[]; questions: Record<QuestionId, InterviewQuestion>; closing: StoryLine[] };
 type ChapterTwoStage = 'intro' | 'walk' | 'opening' | 'choice' | 'branch' | 'closing' | 'summary';
+const chapterOnePhases = new Set<Phase>(['diary', 'prologue', 'explore', 'vote', 'ending']);
 
-const diaryText = '我是新上任的孟婆。\n\n每天，我守在忘川边，替凡人盛一碗孟婆汤，送他们过桥投胎。有人哭喊，有人不舍，也有人记不起自己为何而来。我听过许多故事，却不觉得那些回忆与我有关。\n\n生离死别对凡人是一生，对神明却只是寻常一日。我的差事并不难，只是汤要熬，名册要记，亡魂要一一引渡——简单而繁琐。\n\n前任孟婆留下的孟婆汤，好像只剩下两碗了。希望明天的工作不要出岔子。';
+const diaryText = '　　守在忘川边，我端起那碗孟婆汤待人接过——一日一日，我在人类执念的间隙，听过许多他人的故事。\n\n　　一碗汤下肚，讲述者归于沉默，故事也随之淡忘，接下来只需将亡魂一一引渡——凡人的人生随着神明的一天落下帷幕，简单而繁琐。\n\n　　忘川平静依旧，无望首尾，汤锅里的汤却不知不觉减少着。\n\n　　生命投入忘川，如同热汤灌入脏腑，最终消逝，了无痕迹。';
+
+const defaultDiaryBackdrop = 'https://game-asset.evomeme.com/canvas/0d173e78-4196-4e33-8031-4d9c80624802.png';
+const defaultDiaryPaper = 'https://game-asset.evomeme.com/canvas/fb244625-9865-4d48-8214-4b7bd0e2059b.png';
+const defaultDialogueUi = './ui/dialogue-panel.png';
+const defaultOptionUi = './ui/small-choice-button.png';
 
 const prologueLines: StoryLine[] = [
-  { speaker: 'mengpo', text: '三位先别争。我刚刚清点过汤锅，孟婆汤只剩下两碗了。' },
-  { speaker: 'mengpo', text: '你们之中只能有一人保留前世记忆；另外两人必须饮汤，忘却前尘后投胎。' },
-  { speaker: 'jin', text: '（金万山低头掩住笑意，小声盘算。）只剩两碗……那岂不是有人能保住记忆？' },
-  { speaker: 'lin', text: '真的？那我就不用忘记女儿了！我还能接着找她！' },
-  { speaker: 'gu', text: '（顾沉的指节攥得发白。）要我忘了仇人？绝不可能。' },
-  { speaker: 'lin', text: '我找了女儿这么多年，好不容易才有再见她的希望。我比谁都应该留下记忆。' },
-  { speaker: 'jin', text: '我一生的财富都藏在一个只有我知道的地方，当然该由我保留记忆。' },
-  { speaker: 'gu', text: '朋友背叛我、害死我。这笔账必须由我亲自讨回来。' },
-  { speaker: 'mengpo', text: '既然如此，你们三人就各自讲一讲自己的人生经历。之后再投票，选出唯一能保留记忆的人。' },
+  { speaker: 'lin', text: '请问，这里就是奈何桥吗？' },
+  { speaker: 'mengpo', text: '正是。三位是来投胎的亡魂吧？请随我来。' },
+  { speaker: 'mengpo', text: '三位稍等，我这就为你们准备孟婆汤。' },
+  { speaker: 'mengpo', text: '（小孟婆拿起汤勺，从锅中舀出孟婆汤，依次盛入碗中。打到第三碗时，汤锅已经见底。桌上只摆着两碗孟婆汤。）' },
+  { speaker: 'mengpo', text: '咦？怎么只剩两碗了？' },
+  { speaker: 'jin', text: '两碗？你没弄错吧？我们可是三个人！这要怎么分？' },
+  { speaker: 'lin', text: '那……是不是有一个人就没法喝汤了？！' },
+  { speaker: 'gu', text: '先别急。孟婆大人，照规矩来说，少一碗汤会有什么后果？' },
+  { speaker: 'mengpo', text: '有人将无法抹去执念再入轮回。孟婆汤需要特殊材料熬制，现有材料已经用完，短时间内无法重新熬制。亡魂又不能长时间滞留奈何桥，必须尽快完成引渡，否则你们的魂魄将会残损，即使重入轮回也无法修补。' },
+  { speaker: 'gu', text: '所以，有一个人可以不用喝汤？' },
+  { speaker: 'mengpo', text: '是的。三位之中，两人需要喝下孟婆汤，忘却前世；只有一人能够保留记忆，带着记忆转世。' },
+  { speaker: 'lin', text: '那我不喝！我还要找我的女儿！' },
+  { speaker: 'jin', text: '我也不想喝汤！我辛辛苦苦攒下的家业，怎么能说忘就忘？' },
+  { speaker: 'gu', text: '看来，我们三个都不打算让步。' },
 ];
 
 const voteLines: StoryLine[] = [
@@ -81,8 +100,9 @@ const people: Person[] = [
 const chapterTwoIntro: StoryLine[] = [
   { speaker: 'mengpo', text: '我想分别了解一下你们的情况。' },
   { speaker: 'jin', text: '要一个一个问？有什么话不能当着大家的面说？' },
-  { speaker: 'mengpo', text: '每个人的经历都不一样，我想听你们自己说。' },
-  { speaker: 'mengpo', text: '（小孟婆示意林秀先跟随自己来到引魂廊，另外两位留在远处等候。）' },
+  { speaker: 'mengpo', text: '如果你愿意在所有人面前谈起你的宝藏的话，一起问询也没有问题。' },
+  { speaker: 'jin', text: '（噤声）' },
+  { speaker: 'mengpo', text: '没有异议的话，按照来到奈何桥的顺序开始吧。\n（小孟婆示意林秀先跟随自己来到引魂廊，另外两位留在孟婆亭等候。）' },
 ];
 
 const interviews: Record<GhostId, InterviewScript> = {
@@ -92,21 +112,27 @@ const interviews: Record<GhostId, InterviewScript> = {
       { speaker: 'lin', text: '孟婆大人想知道什么？' },
     ],
     questions: {
-      A: { text: '这些年，你都是怎么继续寻找女儿的？', score: 2, lines: [
-        { speaker: 'mengpo', text: '这些年，你都是怎么继续寻找女儿的？' },
-        { speaker: 'lin', text: '到处打听，也参加过不少寻亲活动。只要有一点消息，我都不愿意错过。' },
-        { speaker: 'mengpo', text: '这么多年过去，一直没有消息，你还坚持得下来吗？' },
-        { speaker: 'lin', text: '当然要坚持。现在有不少人认识我，也愿意帮我留意消息。要是我不再露面，大家慢慢忘了这件事，女儿就更难找到了。' },
-        { speaker: 'mengpo', text: '你担心大家忘记这件事？' },
-        { speaker: 'lin', text: '是啊……我不能让这件事就这么过去。' },
+      A: { text: '你在寻找女儿的过程中负担了很多吧。', score: 2, lines: [
+        { speaker: 'mengpo', text: '你找了女儿这么多年，经济和精神上的负担应当不小吧。' },
+        { speaker: 'lin', text: '中间有几年确实不堪重负。最初家里人对找孩子的事情也还算配合，但找了几个月之后渐渐也都有些灰心了，只剩我还一直坚持。' },
+        { speaker: 'lin', text: '为此我和丈夫还有父母吵了不少架，最后闹得离了婚。我在家和父母住不下去，找工作又没有起色，一直发寻亲启事也几乎没有得到过什么回应，那个时候几乎就要放弃了。' },
+        { speaker: 'mengpo', text: '后来遇到了转机？' },
+        { speaker: 'lin', text: '是的，有一档寻亲节目看到了我发的寻人启事，主动提出邀请我上节目，还负担了我的勤务费用，甚至无偿帮我募捐。' },
+        { speaker: 'lin', text: '也是多亏这份善举，我才撑过了经济困难期，得以有心力供养父母、负担自己的食宿、继续寻找女儿。' },
+        { speaker: 'mengpo', text: '你已经十分困难，却依旧要养活全家人吗？' },
+        { speaker: 'lin', text: '是的......我父母都是农村人，老了腿脚不好收入也近乎于无，所以我很感谢第一个找到我的那档寻亲节目。' },
+        { speaker: 'lin', text: '多亏他们的宣传，我才得以被许多好心人看见、结识了许多无偿协助寻人的公益组织。' },
+        { speaker: 'lin', text: '而且自从我得到了资助，我父母和我的争吵也减少了，大概是他们不希望我成为拖累吧。' },
+        { speaker: 'mengpo', text: '（小孟婆内心：她明明遭遇了种种阻碍，却还是始终不愿放弃吗，支撑着她的究竟是？）' },
       ] },
-      B: { text: '你一直带着这张照片参加寻亲活动吗？', score: 1, lines: [
-        { speaker: 'mengpo', text: '你一直带着这张照片参加寻亲活动吗？' },
-        { speaker: 'lin', text: '是啊，每次接受采访，我都会带着它。' },
-        { speaker: 'mengpo', text: '这么多年，应该有不少人看过这张照片吧？' },
-        { speaker: 'lin', text: '可不是嘛。现在很多人一看到我，就知道我是来找女儿的。' },
-        { speaker: 'mengpo', text: '那他们后来还会问起你女儿的消息吗？' },
-        { speaker: 'lin', text: '当然会。每次有人问，我都得再说一遍她走失的经过。只要还有人记得这件事，我就还有希望。' },
+      B: { text: '你花了很长时间寻找女儿吧。', score: 1, lines: [
+        { speaker: 'mengpo', text: '你花了多长时间找你的女儿呢？' },
+        { speaker: 'lin', text: '从她7岁那年算起，至今应该有五十余年了。' },
+        { speaker: 'mengpo', text: '你似乎一直带着那张照片，这么多年，应该有不少人看过这张照片吧？' },
+        { speaker: 'lin', text: '是啊，这样也方便我随时向人问起我女儿。不过数十年的时光，她的容颜怎么可能没有改变，我想，我更多是想要自己别忘了她吧。' },
+        { speaker: 'mengpo', text: '你如此执着，难道还会忘记吗？' },
+        { speaker: 'lin', text: '我......我肯定不愿意忘了她，可好像除了我，就没有人记得她了......我必须、必须要记得她！' },
+        { speaker: 'mengpo', text: '（小孟婆内心：她的坚持里，似乎有某种超越思念的执念。）' },
       ] },
     },
     closing: [
@@ -117,25 +143,25 @@ const interviews: Record<GhostId, InterviewScript> = {
   jin: {
     opening: [
       { speaker: 'mengpo', text: '金万山，你说自己藏起了大部分财宝，还想在下一世重新找回来。我有些事情想问问你。' },
-      { speaker: 'jin', text: '孟婆大人尽管问。不过，我可得先说好，藏宝的具体地点，我是绝不会告诉任何人的。' },
+      { speaker: 'jin', text: '我可以回答，不过，我可得先说好，藏宝的具体地点，我是绝不会告诉任何人的。' },
       { speaker: 'mengpo', text: '我并不是想问你藏宝的地点。' },
     ],
     questions: {
-      A: { text: '你找回财宝之后，打算做什么？', score: 1, lines: [
-        { speaker: 'mengpo', text: '你说下一世要找回财宝，找回来之后，还打算做什么？' },
-        { speaker: 'jin', text: '自然是重新置办家业，把生意再做起来。' },
-        { speaker: 'mengpo', text: '你已经辛苦了一辈子，下一世还想继续经商？' },
-        { speaker: 'jin', text: '那是当然。不过，除了那些财宝，我还在藏宝的地方留了些别的东西，下一世也得一并找回来。' },
-        { speaker: 'mengpo', text: '别的东西？是什么？' },
-        { speaker: 'jin', text: '一些旧物罢了，没什么值钱的。孟婆大人还是别问了。' },
+      A: { text: '你看起来似乎相当抗拒失去记忆进入轮回。', score: 1, lines: [
+        { speaker: 'mengpo', text: '讨论谁可以带着记忆重入轮回的时候，你似乎是最激动的。' },
+        { speaker: 'jin', text: '能有办法享受上辈子没能享受的家财，不管是谁都会激动的吧？' },
+        { speaker: 'mengpo', text: '真的只是这么简单？' },
+        { speaker: 'jin', text: '我看不出我的想法有什么问题，属于我的东西，我当然有权取回来，难道还应该大方地拱手让人吗？您是神仙，当然不懂，有的东西理所应当就该掌握在自己手里。' },
+        { speaker: 'mengpo', text: '（小孟婆内心：这听起来可不是财宝那么简单，他似乎话里有话。）' },
       ] },
-      B: { text: '你辛苦了一辈子，为什么还这么放不下财富？', score: 2, lines: [
-        { speaker: 'mengpo', text: '你辛苦了一辈子，为什么还这么放不下财富？' },
-        { speaker: 'jin', text: '孟婆大人有所不知，我年轻时穷得叮当响，吃过多少苦，才有今天的家业。' },
-        { speaker: 'mengpo', text: '所以你不愿意让自己一辈子的心血就这样消失？' },
-        { speaker: 'jin', text: '那是自然！我这一辈子什么都靠自己，一点一点攒下来的。如今好不容易有了这些财富，怎么能说忘就忘？' },
-        { speaker: 'mengpo', text: '看来，这些财富对你来说不只是钱财。' },
-        { speaker: 'jin', text: '当然！那可是一辈子的心血。只要还有机会，我就一定要把它们找回来。' },
+      B: { text: '你看起来似乎相当在意自己留下的财富。', score: 2, lines: [
+        { speaker: 'mengpo', text: '你似乎把自己藏起来的财宝看得很重要。' },
+        { speaker: 'jin', text: '这是当然的，我年轻的时候曾穷困潦倒，那个时候一件干净的衣服、一顿饱饭都是奢侈的妄想。' },
+        { speaker: 'jin', text: '也是我命不好，从前倒霉欠了不该欠的钱，我生不如死的时候，逼着我去死的人却过得丰衣足食、尽享安乐，这叫我如何能甘心？' },
+        { speaker: 'jin', text: '我把财宝藏起来时，抱的不过是不愿便宜了别人的想法，我苦了那么多年，牺牲了那么多才得到的东西，怎么能让别人坐享其成？' },
+        { speaker: 'mengpo', text: '牺牲？' },
+        { speaker: 'jin', text: '我、我那都是靠自己赚来的，体力上的牺牲就不叫牺牲吗？总之那都是我的心血，我绝对不会松口的！' },
+        { speaker: 'mengpo', text: '（小孟婆内心：他似乎隐瞒了什么，难道那些钱财的来源有蹊跷？）' },
       ] },
     },
     closing: [
@@ -145,28 +171,31 @@ const interviews: Record<GhostId, InterviewScript> = {
   },
   gu: {
     opening: [
-      { speaker: 'mengpo', text: '顾沉，你说自己被最信任的朋友背叛，甚至因此丢了性命。我想再了解一些你们之间的事情。' },
+      { speaker: 'mengpo', text: '顾沉，你说自己要复仇。我想再了解一些你和你的仇人们之间的事情。' },
       { speaker: 'gu', text: '孟婆大人想问什么？' },
     ],
     questions: {
-      A: { text: '你说以前把他当作兄弟，之前关系很好吗？', score: 2, lines: [
+      A: { text: '杀害你的人和你曾是亲密的朋友？', score: 2, lines: [
         { speaker: 'mengpo', text: '你说把他当作兄弟，你们以前关系很好吗？' },
         { speaker: 'gu', text: '当然。我们一起经营事业，经历过不少事情。那时候，我很信任他，很多事情都愿意和他商量。' },
-        { speaker: 'mengpo', text: '既然如此，你们矛盾应该很少呀？' },
-        { speaker: 'gu', text: '起初是这样。后来生意越做越大，事情也多了起来。有些事情，我觉得还是自己拿主意比较稳妥。' },
-        { speaker: 'mengpo', text: '他对此没有意见吗？' },
-        { speaker: 'gu', text: '他起初倒也没说什么。后来……算了，都过去了。' },
-        { speaker: 'mengpo', text: '你似乎不太愿意提起这段经历。' },
-        { speaker: 'gu', text: '没什么好说的。反正最后是他先背叛了我。' },
+        { speaker: 'mengpo', text: '既然如此，你们理应不会走入当下这个结局吧？' },
+        { speaker: 'gu', text: '您不知道，他是个交游很广的人，当初我们这个企业成立时，各方资源也多是他协调的。' },
+        { speaker: 'gu', text: '从大学时起我就认识他了，他这个人一直都是这样，在人群里是风云人物，虽然善于交际，却总是不够谨慎，盲信他人。' },
+        { speaker: 'gu', text: '除了和我的企业，他在外也有许多投资项目，他杀害我的时候，我刚好打听到他手里的好几个项目都砸了，大概他对我动手，是因为接受不了自己如今和我之间的落差吧。' },
+        { speaker: 'mengpo', text: '所以你的意思是，你认为他是因为嫉妒才对你痛下杀手吗？' },
+        { speaker: 'gu', text: '我想是的。其实他手里砸的那几个项目，还不至于让他完全翻不了身，拿得到足够的流动资金的话，还是有机会盘活的。' },
+        { speaker: 'gu', text: '如果不是因为嫉妒我，为什么要因为自己一时的失败就拉着我陪葬？' },
+        { speaker: 'mengpo', text: '（小孟婆内心：他在出事前打听了对方的经济状况，是巧合吗？）' },
       ] },
-      B: { text: '你们一起经营事业时，平时是谁负责打理账目？', score: 1, lines: [
-        { speaker: 'mengpo', text: '你们一起经营事业时，平时是谁负责打理账目？' },
-        { speaker: 'gu', text: '主要是我。他负责外面的事情，账目和经营上的决策基本都由我来处理。' },
-        { speaker: 'mengpo', text: '那他后来为什么会和你产生矛盾？' },
-        { speaker: 'gu', text: '大概是觉得自己分得少了吧。人一旦起了贪念，就什么都不顾了。' },
-        { speaker: 'mengpo', text: '既然账目一直由你负责，他又怎么知道自己分得少了？' },
-        { speaker: 'gu', text: '……他后来自己查了账。' },
-        { speaker: 'mengpo', text: '（顾沉停顿片刻，避开小孟婆的目光。）' },
+      B: { text: '杀害你的人有表现出为什么要杀你吗？', score: 1, lines: [
+        { speaker: 'mengpo', text: '你们明明是一起经营事业的伙伴，你死了，对公司的经营应该没有好处。' },
+        { speaker: 'gu', text: '别说您了，我对此也很不解。但我之前隐约听到一点风声......' },
+        { speaker: 'mengpo', text: '什么风声？' },
+        { speaker: 'gu', text: '他在外的资金链似乎出了问题，背上了大笔债务。' },
+        { speaker: 'mengpo', text: '这似乎与你没有关系？' },
+        { speaker: 'gu', text: '大概是因为我是他最亲近的朋友吧，他本来是来找我商借资金的，还为此就公司的资金流动大吵一架，我拒绝借钱，他一怒之下就对我动了手。' },
+        { speaker: 'gu', text: '（顾沉嘴上不停，却避开小孟婆的目光。）' },
+        { speaker: 'mengpo', text: '（小孟婆内心：他似乎隐瞒了一些实情，看来这不是简单的受害与寻仇。）' },
       ] },
     },
     closing: [
@@ -177,11 +206,11 @@ const interviews: Record<GhostId, InterviewScript> = {
 };
 
 const chapterTwoSummary: StoryLine[] = [
-  { speaker: 'mengpo', text: '林秀对女儿的思念看起来并非作假，可她谈起这些年的寻亲经历时，总有些地方让我觉得奇怪。' },
-  { speaker: 'mengpo', text: '金万山对财宝的执着远超寻常，似乎还有什么事情不愿意告诉我。' },
-  { speaker: 'mengpo', text: '顾沉一再强调朋友的背叛，可他们之间的纠纷，恐怕并没有他说得那么简单。' },
-  { speaker: 'mengpo', text: '他们说的似乎都有道理，可我总觉得，他们并没有说出全部实情。' },
-  { speaker: 'mengpo', text: '仅凭这些只言片语，我还无法判断他们究竟隐瞒了什么。看来，必须亲自看看他们的记忆。先从金万山开始吧。' },
+  { speaker: 'mengpo', text: '（小孟婆内心：林秀对女儿的思念是真的，但她身边的环境对她寻亲的态度似乎也很复杂，这会对她有所影响吗？）' },
+  { speaker: 'mengpo', text: '（小孟婆内心：金万山对财宝的执着远超寻常，话里话外又暗藏玄机，他真的只藏起了财宝吗？）' },
+  { speaker: 'mengpo', text: '（小孟婆内心：顾沉始终强调自己的无辜，却又避开了谈起行凶当晚的事，他所说的背叛恐怕另有隐情。）' },
+  { speaker: 'mengpo', text: '（小孟婆内心：他们说的似乎都有道理，可我总觉得，他们并没有说出全部实情。）' },
+  { speaker: 'mengpo', text: '（小孟婆内心：仅凭这些只言片语，我还无法判断他们究竟隐瞒了什么。虽然这样会辛苦很多，但我必须亲自看看他们的记忆了。）' },
 ];
 
 function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcsSpread, onNearby, onTalk, chapterTwo = false, interviewPerson = null, availablePeople, canTalk = true }: { speed: number; backgroundColor: string; heardCount: number; nearby: GhostId | null; blocked: boolean; npcsSpread: boolean; onNearby: (id: GhostId | null) => void; onTalk: (id: GhostId) => void; chapterTwo?: boolean; interviewPerson?: GhostId | null; availablePeople?: GhostId[]; canTalk?: boolean }) {
@@ -189,7 +218,8 @@ function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcs
   const world = useRef<HTMLDivElement>(null);
   const player = useRef<HTMLDivElement>(null);
   const direction = useRef(0);
-  const position = useRef(310);
+  const position = useRef(chapterTwo ? 310 : 890);
+  const facing = useRef<'left' | 'right'>(chapterTwo ? 'right' : 'left');
   const nearbyRef = useRef<GhostId | null>(null);
   const speedRef = useRef(speed);
   const blockedRef = useRef(blocked);
@@ -205,7 +235,7 @@ function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcs
         : interviewPerson === 'gu' ? { lin: 90, jin: 300, gu: 1290 }
           : heardCount === 0 ? { lin: 430, jin: 1080, gu: 1290 }
             : { lin: 110, jin: 720, gu: 1250 }
-    : npcsSpread ? { lin: 600, jin: 720, gu: 840 } : { lin: 430, jin: 540, gu: 650 };
+    : npcsSpread ? { lin: 760, jin: 610, gu: 460 } : { lin: 755, jin: 620, gu: 480 };
   const allowedPeople = availablePeople ?? ['lin', 'jin', 'gu'];
   const ghostPositions = useRef(ghostX);
   const allowedPeopleRef = useRef(allowedPeople);
@@ -260,9 +290,8 @@ function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcs
         const viewportWidth = 1280;
         const cameraX = Math.max(0, Math.min(1400 - viewportWidth, position.current - viewportWidth * 0.35));
         player.current.style.left = `${position.current}px`;
-        if (direction.current !== 0) {
-          player.current.style.transform = `translateX(-50%) scaleX(${direction.current < 0 ? -1 : 1})`;
-        }
+        if (direction.current !== 0) facing.current = direction.current < 0 ? 'left' : 'right';
+        player.current.style.transform = `translateX(-50%) scaleX(${facing.current === 'left' ? -1 : 1})`;
         player.current.classList.toggle('walking', direction.current !== 0);
         world.current.style.transform = `scale(${bridgeScale.current}) translate3d(${-cameraX}px,0,0)`;
         const nearest = (Object.entries(ghostPositions.current) as Array<[GhostId, number]>)
@@ -313,11 +342,12 @@ function BridgeWorld({ speed, backgroundColor, heardCount, nearby, blocked, npcs
 
 function VisualNovelDialogue({ line, index, total, onAdvance, eyebrow = '奈何桥 · 对话' }: { line: StoryLine; index: number; total: number; onAdvance: () => void; eyebrow?: string }) {
   const voice = voiceMeta[line.speaker];
+  const textDensity = line.text.length > 180 ? ' very-long' : line.text.length > 100 ? ' long' : '';
   return <div className={`vn-dialogue voice-${line.speaker}`}>
     <img className="vn-bust" src={`./art-test/${voice.portrait}-portrait.png`} alt="" draggable={false}/>
     <div className="vn-box">
       <div className="vn-nameplate"><span className="eyebrow">{eyebrow}</span><strong>{voice.name}</strong><small>{voice.role}</small><span className="dialogue-count">{String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</span></div>
-      <p className="vn-text">{line.text}</p>
+      <p className={`vn-text${textDensity}`}>{line.text}</p>
       <div className="vn-footer"><span>点击继续</span><button className="primary" onClick={onAdvance}>继续 <b>→</b></button></div>
     </div>
   </div>;
@@ -327,11 +357,15 @@ function InterviewQuestionPanel({ personId, onSelect }: { personId: GhostId; onS
   const person = voiceMeta[personId];
   const questions = interviews[personId].questions;
   return <section className="interview-choice-panel" aria-label={`${person.name}的问题选择`}>
-    <small>单次问询 · 选择一个问题</small>
-    <h2>你想了解什么？</h2>
-    {(['A', 'B'] as QuestionId[]).map((id) => <button key={id} onClick={() => onSelect(id)}>
-      <b>{id}</b><span>{questions[id].text}</span><i>倾向值 +{questions[id].score}</i>
-    </button>)}
+    <header className="interview-choice-heading">
+      <small>单次问询 · 选择一个问题</small>
+      <h2>你想了解什么？</h2>
+    </header>
+    <div className="interview-choice-duo">
+      {(['A', 'B'] as QuestionId[]).map((id) => <button key={id} onClick={() => onSelect(id)}>
+        <b>{id}</b><span>{questions[id].text}</span><i>倾向值 +{questions[id].score}</i>
+      </button>)}
+    </div>
   </section>;
 }
 
@@ -354,8 +388,12 @@ function App() {
   const [interviewed, setInterviewed] = useState<GhostId[]>([]);
   const [interviewChoices, setInterviewChoices] = useState<Partial<Record<GhostId, QuestionId>>>({});
   const [interviewScores, setInterviewScores] = useState<Record<GhostId, number>>({ lin: 0, jin: 0, gu: 0 });
+  const chapterOneBgmRef = useRef<HTMLAudioElement>(null);
+  const chapterTwoBgmRef = useRef<HTMLAudioElement>(null);
 
   const diaryCharacters = Array.from(diaryText);
+  const chapterOneBgmSrc = config.bgm_chapter_one?.value ?? './audio/wangchuan-chapter-one.mp3';
+  const chapterTwoBgmSrc = config.bgm_chapter_two?.value ?? './audio/wangchuan-variation-chapter-two.mp3';
 
   useEffect(() => {
     fetch('./config.json').then((response) => response.json()).then((loaded: Config) => {
@@ -371,11 +409,49 @@ function App() {
     return () => window.clearTimeout(timer);
   }, [phase, diaryVisible, diaryCharacters.length]);
 
+  useEffect(() => {
+    const audio = chapterOneBgmRef.current;
+    if (!audio) return;
+
+    if (!chapterOnePhases.has(phase) || !(config.audio_music_enabled?.value ?? true)) {
+      audio.pause();
+      if (!chapterOnePhases.has(phase)) audio.currentTime = 0;
+      return;
+    }
+
+    const volume = Math.min(1, Math.max(0, config.bgm_volume?.value ?? .45));
+    audio.volume = volume;
+    if (audio.paused) {
+      void audio.play().catch((error) => console.warn('[BGM] chapter one playback failed', error));
+    }
+  }, [chapterOneBgmSrc, config.audio_music_enabled?.value, config.bgm_volume?.value, phase]);
+
+  useEffect(() => {
+    const audio = chapterTwoBgmRef.current;
+    if (!audio) return;
+    const active = (phase === 'chapterTwo' || phase === 'chapterTwoEnding') && (config.audio_music_enabled?.value ?? true);
+
+    if (!active) {
+      audio.pause();
+      if (phase !== 'chapterTwo' && phase !== 'chapterTwoEnding') audio.currentTime = 0;
+      return;
+    }
+
+    audio.volume = Math.min(1, Math.max(0, config.bgm_volume?.value ?? .45));
+    if (audio.paused) {
+      void audio.play().catch((error) => console.warn('[BGM] chapter two playback failed', error));
+    }
+  }, [chapterTwoBgmSrc, config.audio_music_enabled?.value, config.bgm_volume?.value, phase]);
+
   const palette = {
     '--bg': config.ui_background?.value ?? '#17161d',
     '--panel': config.ui_panel?.value ?? '#24232c',
     '--accent': config.ui_accent?.value ?? '#e3b86f',
     '--ink': config.ui_text?.value ?? '#f3eee5',
+    '--diary-backdrop-image': `url("${config.image_diary_backdrop?.value ?? defaultDiaryBackdrop}")`,
+    '--diary-paper-image': `url("${config.image_diary_paper?.value ?? defaultDiaryPaper}")`,
+    '--dialogue-ui-image': `url("${config.image_ui_dialogue?.value ?? defaultDialogueUi}")`,
+    '--option-ui-image': `url("${config.image_ui_option?.value ?? defaultOptionUi}")`,
   } as React.CSSProperties;
   const currentPerson = people.find((person) => person.id === speaker);
   const dialogueLines = currentPerson?.dialogue ?? [];
@@ -415,6 +491,12 @@ function App() {
     setInterviewScores({ lin: 0, jin: 0, gu: 0 });
     setPhase('chapterTwo');
   };
+
+  useEffect(() => {
+    if (phase !== 'ending') return;
+    const transitionTimer = window.setTimeout(beginChapterTwo, 5000);
+    return () => window.clearTimeout(transitionTimer);
+  }, [phase]);
 
   const startInterview = (id: GhostId) => {
     if (phase !== 'chapterTwo' || chapterTwoStage !== 'walk' || interviewed.includes(id)) return;
@@ -463,7 +545,7 @@ function App() {
         setChapterTwoStage('walk');
       }
     } else if (chapterTwoStage === 'summary') {
-      setPhase('jinChapter');
+      setPhase('chapterTwoEnding');
     }
   };
 
@@ -489,8 +571,8 @@ function App() {
     else advanceConversation();
   };
   const continueDiary = () => {
-    if (diaryVisible < diaryCharacters.length) setDiaryVisible(diaryCharacters.length);
-    else { setPrologueIndex(0); setPhase('prologue'); }
+    setPrologueIndex(0);
+    setPhase('prologue');
   };
   const updateSpeed = (value: number) => {
     setSpeed(value);
@@ -499,8 +581,11 @@ function App() {
   const chapterTwoAvailablePeople: GhostId[] = interviewed.length === 0
     ? ['lin']
     : (['lin', 'jin', 'gu'] as GhostId[]).filter((id) => !interviewed.includes(id));
+  const visibleDiaryParagraphs = diaryCharacters.slice(0, diaryVisible).join('').split('\n\n');
 
   return <main className="app" style={palette}>
+    <audio ref={chapterOneBgmRef} src={chapterOneBgmSrc} loop preload="auto" hidden />
+    <audio ref={chapterTwoBgmRef} src={chapterTwoBgmSrc} loop preload="auto" hidden />
     {phase === 'menu' && <section className="menu-screen">
       <div className="menu-copy"><div className="eyebrow">忘川 · 记忆录</div><h1>忘川录</h1><p className="subtitle">亡魂未尽的人间事</p><p className="menu-description">选择一段记忆进入，继续调试章节内容。</p><div className="menu-chapters">
         <button className="chapter-entry" onClick={beginGame}><span className="chapter-index">第一章</span><span className="chapter-title">两碗孟婆汤</span><small>奈何桥 · 对话与投票</small><b>→</b></button>
@@ -516,7 +601,7 @@ function App() {
     {phase === 'settings' && <section className="subpage"><div className="eyebrow">设置 / SETTINGS</div><h2>游玩设置</h2><div className="setting-row"><div><strong>移动速度</strong><small>调整小孟婆在奈何桥上的行走速度</small></div><output>{speed}</output><input aria-label="移动速度" type="range" min="120" max="360" step="10" value={speed} onChange={(event) => updateSpeed(Number(event.target.value))}/></div><div className="setting-help"><b>操作方式</b><span>电脑：A / D 或方向键移动，E 或空格交谈</span><span>手机：按住左右方块行走，靠近亡魂后点击“交谈”</span></div><button className="secondary-button" onClick={() => setPhase('menu')}>返回主页面</button></section>}
 
     {phase === 'diary' && <section className="diary-screen">
-      <div className="diary-sheet"><div className="diary-heading"><span className="eyebrow">忘川值事录 · 第一日</span><span>新任孟婆手记</span></div><div className="diary-copy">{diaryCharacters.slice(0, diaryVisible).join('')}{diaryVisible < diaryCharacters.length && <i className="diary-caret"/>}</div><div className="diary-footer"><span>{diaryVisible < diaryCharacters.length ? '墨迹未干……' : '手记已毕'}</span><button className="primary" onClick={continueDiary}>{diaryVisible < diaryCharacters.length ? '显示全部文字' : '走上奈何桥'} <span>→</span></button></div></div>
+      <div className="diary-sheet"><div className="diary-heading"><span className="diary-title">忘川值事录　扉页</span></div><div className={`diary-copy ${diaryVisible >= diaryCharacters.length ? 'complete' : ''}`}>{visibleDiaryParagraphs.map((paragraph, index) => <p key={index}>{paragraph}{index === visibleDiaryParagraphs.length - 1 && diaryVisible < diaryCharacters.length && <i className="diary-caret"/>}</p>)}</div><div className="diary-footer">{diaryVisible >= diaryCharacters.length && <button className="primary" onClick={continueDiary}>走上奈何桥 <span>→</span></button>}</div></div>
     </section>}
 
     {(['prologue', 'explore', 'vote', 'chapterTwo'] as Phase[]).includes(phase) && <section className="explore-screen">
@@ -532,7 +617,8 @@ function App() {
       {phase === 'chapterTwo' && activeLine && <VisualNovelDialogue line={activeLine} index={chapterTwoIndex} total={chapterTwoLines.length} onAdvance={advanceChapterTwo} eyebrow={chapterTwoStage === 'summary' ? '第二章 · 小孟婆的判断' : '引魂廊 · 单独问询'}/>}
     </section>}
 
-    {phase === 'ending' && <section className="chapter-end"><div className="end-seal">忘川</div><h2>第一章终了</h2><span className="end-rule"/><button className="ending-return" onClick={() => setPhase('menu')}>返回标题</button></section>}
+    {phase === 'ending' && <section className="chapter-end"><div className="end-seal">忘川</div><h2>第一章终了</h2><span className="end-rule"/></section>}
+    {phase === 'chapterTwoEnding' && <section className="chapter-end"><div className="end-seal">忘川</div><h2>第二章终了</h2><span className="end-rule"/></section>}
     {phase === 'jinChapter' && <JinChapter onExit={() => setPhase('menu')} initialAffinity={interviewScores.jin}/>}
     {phase === 'linMemory' && <LinMemoryChapter onExit={() => setPhase('menu')} initialAffinity={interviewScores.lin} chaseSpeed={config.lin_chase_speed?.value ?? 90}/>}
     {phase === 'guMemory' && <GuMemoryChapter onExit={() => setPhase('menu')} settings={{
@@ -541,6 +627,7 @@ function App() {
       earlyInterval: config.gu_early_shake_interval?.value ?? 2.5,
       earlyStrength: config.gu_early_shake_strength?.value ?? 12,
     }}/>}
+    {phase === 'chapterTwo' && <div className="chapter-two-fade" aria-hidden="true"/>}
   </main>;
 }
 

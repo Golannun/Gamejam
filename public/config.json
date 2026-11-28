@@ -5,10 +5,18 @@
   "ui_panel": { "value": "#24232c", "type": "color", "label": "面板色" },
   "ui_accent": { "value": "#e3b86f", "type": "color", "label": "强调色" },
   "ui_text": { "value": "#f3eee5", "type": "color", "label": "文字色" },
+  "image_diary_backdrop": { "value": "https://game-asset.evomeme.com/canvas/0d173e78-4196-4e33-8031-4d9c80624802.png", "type": "image", "image_type": "Asset", "size": "2560x1440", "label": "手记场景图" },
+  "image_diary_paper": { "value": "https://game-asset.evomeme.com/canvas/fb244625-9865-4d48-8214-4b7bd0e2059b.png", "type": "image", "image_type": "Asset", "size": "1728x2304", "label": "手记纸张图" },
+  "image_ui_dialogue": { "value": "./ui/dialogue-panel.png", "type": "image", "image_type": "Asset", "size": "2019x681", "label": "对话面板" },
+  "image_ui_option": { "value": "./ui/small-choice-button.png", "type": "image", "image_type": "Asset", "size": "1013x274", "label": "选项按钮" },
   "move_speed": { "value": 230, "type": "int", "label": "移动速度", "min": 120, "max": 360 },
   "gu_vibration_enabled": { "value": true, "type": "bool", "label": "触觉震动" },
   "gu_shake_enabled": { "value": true, "type": "bool", "label": "震屏开关" },
   "gu_early_shake_interval": { "value": 2.5, "type": "float", "label": "前半段间隔", "min": 1.2, "max": 6 },
   "gu_early_shake_strength": { "value": 12, "type": "int", "label": "震屏强度", "min": 5, "max": 18 },
-  "lin_chase_speed": { "value": 90, "type": "int", "label": "林秀追速", "min": 48, "max": 180 }
+  "lin_chase_speed": { "value": 90, "type": "int", "label": "林秀追速", "min": 48, "max": 180 },
+  "audio_music_enabled": { "value": true, "type": "bool", "label": "音乐开关" },
+  "bgm_volume": { "value": 0.45, "type": "float", "label": "音乐音量", "min": 0, "max": 1 },
+  "bgm_chapter_one": { "value": "./audio/wangchuan-chapter-one.mp3", "type": "audio", "label": "第一章BGM" },
+  "bgm_chapter_two": { "value": "./audio/wangchuan-variation-chapter-two.mp3", "type": "audio", "label": "第二章BGM" }
 }

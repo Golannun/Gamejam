@@ -3,6 +3,8 @@ node_modules/
 
 # Local game assets, if added later
 assets/
+public/audio/
+public/ui/
 
 # Keep dist/ in the submission scope
 

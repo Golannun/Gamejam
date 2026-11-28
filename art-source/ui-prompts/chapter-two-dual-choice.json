@@ -1,0 +1,14 @@
+{
+  "language": "zh-CN",
+  "prompt": "为东方冥界叙事游戏《忘川录》第二章重新生成一个无文字、无人物、无图标的屏幕中央“二选一”选项 UI。严格采用既定美术方向：博斯式超现实叙事 × 现代平面构成 × 手绘纸艺拼贴。只画两个纵向排列的长方形选项底板，两个选项必须等高、等宽并完全连在一起，形成一个整体二联卡片，中间仅共享一条窄的撕纸分隔边，绝不允许两者之间出现空隙。不要顶部标题区域，不要额外横幅，不要第三个框。整体轮廓近似传统矩形，但边缘保留手工剪裁、撕裂纸边和纸纤维；内部使用深炭黑旧纸，角落少量灰蓝、苔藓绿、旧纸黄、赭红和暗金碎纸叠层，克制的现代平面圆环只能作为边缘小装饰。两个选项中央区域均保持低对比，供运行时叠加中文。色彩严格限制为深炭黑 #2C2B28、苔藓绿 #666C55、灰蓝 #7B9097、旧纸黄 #C9BA9B、赭红 #8B4440、暗金 #A88C63、骨白 #DAD1BD、幽青蓝 #4B8794。透明背景，约4:3，二联卡片居中且完整可见。禁止文字、字母、数字、角色、图标、切割线、状态标签和水印；禁止仙侠金边、二次元、写实3D、光滑矢量、霓虹泛光、高饱和与海报感。",
+  "model": "asset-max",
+  "size": "2304x1728",
+  "background": "transparent",
+  "transparent_background": true,
+  "reference_asset_urls": [
+    "https://game-asset.evomeme.com/canvas/0d173e78-4196-4e33-8031-4d9c80624802.png",
+    "https://game-asset.evomeme.com/canvas/fb244625-9865-4d48-8214-4b7bd0e2059b.png",
+    "https://game-asset.evomeme.com/canvas/5d847231-2ccf-4ede-bb41-ac30564c7922.png",
+    "https://game-asset.evomeme.com/canvas/bebf23ed-7e39-474a-96d1-bc8d82a49c8f.png"
+  ]
+}
